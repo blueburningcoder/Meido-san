@@ -23,23 +23,22 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
           'https://www.googleapis.com/auth/gmail.send',
           'https://www.googleapis.com/auth/gmail.labels',
           'https://www.googleapis.com/auth/gmail.modify']
+
 CLIENT_SECRET_FILE = '../../Downloads/client_secret.json'
 APPLICATION_NAME = 'Meido-san'
 
 
 def ListMessagesMatchingQuery(service, user_id, query=''):
     """List all Messages of the user's mailbox matching the query.
-
     Args:
-      service: Authorized Gmail API service instance.
-      user_id: User's email address. The special value "me"
-      can be used to indicate the authenticated user.
-      query: String used to filter messages returned.
-      Eg.- 'from:user@some_domain.com' for Messages from a particular sender.
-
+        service: Authorized Gmail API service instance.
+        user_id: User's email address. The special value "me"
+        can be used to indicate the authenticated user.
+        query: String used to filter messages returned.
+        Eg.- 'from:user@some_domain.com' for Messages from a particular sender.
     Returns:
-      List of Messages that match the criteria of the query. Note that the
-      appropriate ID to get the details of a Message.
+        List of Messages that match the criteria of the query. Note that the
+        appropriate ID to get the details of a Message.
     """
     try:
         response = service.users().messages().list(userId=user_id,
@@ -47,7 +46,6 @@ def ListMessagesMatchingQuery(service, user_id, query=''):
         messages = []
         if 'messages' in response:
             messages.extend(response['messages'])
-
         while 'nextPageToken' in response:
             page_token = response['nextPageToken']
             response = service.users().messages().list(userId=user_id,
@@ -55,7 +53,6 @@ def ListMessagesMatchingQuery(service, user_id, query=''):
                                                        pageToken=page_token
                                                        ).execute()
             messages.extend(response['messages'])
-
         return messages
     except errors.HttpError, error:
         print 'An error occurred: %s' % error
@@ -64,15 +61,14 @@ def ListMessagesMatchingQuery(service, user_id, query=''):
 def ListMessagesWithLabels(service, user_id, label_ids=[]):
     """List all Messages of the user's mailbox with label_ids applied.
     Args:
-      service: Authorized Gmail API service instance.
-      user_id: User's email address. The special value "me"
-      can be used to indicate the authenticated user.
-      label_ids: Only return Messages with these labelIds applied.
-
+        service: Authorized Gmail API service instance.
+        user_id: User's email address. The special value "me"
+        can be used to indicate the authenticated user.
+        label_ids: Only return Messages with these labelIds applied.
     Returns:
-      List of Messages that have all required Labels applied. Note that the
-      returned list contains Message IDs, you must use get with the
-      appropriate id to get the details of a Message.
+        List of Messages that have all required Labels applied. Note that the
+        returned list contains Message IDs, you must use get with the
+        appropriate id to get the details of a Message.
     """
     try:
         response = service.users().messages().list(userId=user_id,
@@ -81,7 +77,6 @@ def ListMessagesWithLabels(service, user_id, label_ids=[]):
         messages = []
         if 'messages' in response:
             messages.extend(response['messages'])
-
         while 'nextPageToken' in response:
             page_token = response['nextPageToken']
             response = service.users().messages().list(userId=user_id,
@@ -89,7 +84,6 @@ def ListMessagesWithLabels(service, user_id, label_ids=[]):
                                                        pageToken=page_token
                                                        ).execute()
             messages.extend(response['messages'])
-
         return messages
     except errors.HttpError, error:
         print 'An error occurred: %s' % error
@@ -115,11 +109,11 @@ def getCredentials():
 def getMessage(service, user_id, msg_id):
     """ Get a Message with the given ID
     Args:
-      service: Authorized Gmail API service instance
-      user_id: User's email address or 'me'
-      msg_id: The Id D of the message required
+        service: Authorized Gmail API service instance
+        user_id: User's email address or 'me'
+        msg_id: The Id D of the message required
     Returns:
-      A Message
+        A Message
     """
     try:
         message = service.users().messages().get(userId=user_id,
@@ -133,18 +127,17 @@ def getMessage(service, user_id, msg_id):
 def getMimeMessage(service, user_id, msg_id):
     """ Get a Message and use it to create a MIME Message
     Args:
-      service: Authorized Gmail API service instance.
-      user_id: User's email address. The special value "me"
-      can be used to indicate the authenticated user.
-      msg_id: The ID of the Message required.
+        service: Authorized Gmail API service instance.
+        user_id: User's email address. The special value "me"
+        can be used to indicate the authenticated user.
+        msg_id: The ID of the Message required.
     Returns:
-      A MIME Message, consisting of data from the Message.
+        A MIME Message, consisting of data from the Message.
     """
     try:
         message = service.users().messages().get(userId=user_id, id=msg_id,
                                                  format='raw').execute()
         print 'Message snippet: %s' % message['snippet']
-
         msg_str = base64.urlsafe_b64decode(message['raw'].encode('ASCII'))
         mime_msg = email.message_from_string(msg_str)
         return mime_msg
@@ -155,11 +148,11 @@ def getMimeMessage(service, user_id, msg_id):
 def getThread(service, user_id, thread_id):
     """ Get a Thread.
     Args:
-      service: Authorized Gmaiil API service instance.
-      user_id: User's email address.
-      thread_id: The ID of the Thread required.
+        service: Authorized Gmaiil API service instance.
+        user_id: User's email address.
+        thread_id: The ID of the Thread required.
     Returns:
-      Thread with matching ID.
+        Thread with matching ID.
     """
     try:
         thread = service.users().threads().get(userId=user_id,
@@ -175,14 +168,14 @@ def getThread(service, user_id, thread_id):
 def ListThreadsMatchingQuery(service, user_id, query=''):
     """ List all Threads of the user's mailbox matching the query.
     Args:
-      service: Authorized Gmail API serivce instance.
-      user_id: User's email address or "me".
-      query: String used to filter messages returned.
+        service: Authorized Gmail API serivce instance.
+        user_id: User's email address or "me".
+        query: String used to filter messages returned.
             Eg.- 'label:UNREAD' for unread messages only.
     Returns:
-      List of threads that match the criteria of the query. Note that the
-      returned list contains Thread IDs, you must use get with the
-      appropriate ID to get the details for a Thread.
+        List of threads that match the criteria of the query. Note that the
+        returned list contains Thread IDs, you must use get with the
+        appropriate ID to get the details for a Thread.
     """
     try:
         response = service.users().threads().list(userId=user_id,
