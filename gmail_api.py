@@ -28,7 +28,7 @@ CLIENT_SECRET_FILE = '../../Downloads/client_secret.json'
 APPLICATION_NAME = 'Meido-san'
 
 
-def ListMessagesMatchingQuery(service, user_id, query=''):
+def ListMessagesMatchingQuery(service, user_id='me', query=''):
     """List all Messages of the user's mailbox matching the query.
     Args:
         service: Authorized Gmail API service instance.
@@ -58,7 +58,7 @@ def ListMessagesMatchingQuery(service, user_id, query=''):
         print 'An error occurred: %s' % error
 
 
-def ListMessagesWithLabels(service, user_id, label_ids=[]):
+def ListMessagesWithLabels(service, user_id='me', label_ids=[]):
     """List all Messages of the user's mailbox with label_ids applied.
     Args:
         service: Authorized Gmail API service instance.
@@ -106,7 +106,7 @@ def getCredentials():
     return credentials
 
 
-def getMessage(service, user_id, msg_id):
+def getMessage(service, user_id='me', msg_id):
     """ Get a Message with the given ID
     Args:
         service: Authorized Gmail API service instance
@@ -124,7 +124,7 @@ def getMessage(service, user_id, msg_id):
         print 'An error ocurred: %s' % error
 
 
-def getMimeMessage(service, user_id, msg_id):
+def getMimeMessage(service, user_id='me', msg_id):
     """ Get a Message and use it to create a MIME Message
     Args:
         service: Authorized Gmail API service instance.
@@ -145,7 +145,7 @@ def getMimeMessage(service, user_id, msg_id):
         print 'An error ocurred: %s' % error
 
 
-def getThread(service, user_id, thread_id):
+def getThread(service, user_id='me', thread_id):
     """ Get a Thread.
     Args:
         service: Authorized Gmaiil API service instance.
@@ -165,7 +165,7 @@ def getThread(service, user_id, thread_id):
         print 'An error occured: %s' % error
 
 
-def ListThreadsMatchingQuery(service, user_id, query=''):
+def ListThreadsMatchingQuery(service, user_id='me', query=''):
     """ List all Threads of the user's mailbox matching the query.
     Args:
         service: Authorized Gmail API serivce instance.
@@ -195,7 +195,7 @@ def ListThreadsMatchingQuery(service, user_id, query=''):
         print 'An error occured: %s' % error
 
 
-def ListThreadsWithLabels(service, user_id, label_ids=[]):
+def ListThreadsWithLabels(service, user_id='me', label_ids=[]):
     """List all Threads of the user's mailbox with label_ids applied.
     Args:
         service: Authorized Gmail API service instance.
