@@ -251,7 +251,6 @@ def GetAttachments(service, msg_id, user_id='me', store_dir='/home/bez/Downloads
         msg_id: ID of Message containing attachment.
         store_dir: The directory used to store attachments.
     """
-
     try:
         message = service.users().messages().get(userId=user_id, id=msg_id).execute()
         for part in message['payload']['parts']:
@@ -270,12 +269,61 @@ def GetAttachments(service, msg_id, user_id='me', store_dir='/home/bez/Downloads
         print 'An error occurred: %s' % error
 
 
+def UpdateLabel(service, label_id, updated_label_object, user_id='me'):
+    """Update an existing Label.
+    Args:
+        service: Authorized Gmail API service instance.
+        user_id: User's email address or 'me'.
+        label_id: ID of the Label to update.
+        updated_label_object: Updated label.
+    Returns:
+        Updated Label.
+    """
+    try:
+        updated_label_object['id'] = label_id
+        updated_label = (service.users().labels()
+                .update(userId=user_id, id=label_id,
+                        body=updated_label_object).execute())
+        print 'label id: %s - label name: %s' % (updated_label['id'],
+                                                 updated_label['name'])
+        return updated_label
+    except errors.HttpError, error:
+        print 'An error occurred: %s' % error
+
+
+def ListHistory(service, start_history_id='1', user_id='me'):
+    """List History of all changes to the user's mailbox.
+    Args:
+        service: Authorized Gmail API service instance.
+        user_id: User's email address or 'me'.
+        start_history_id: Only return Histories at or after start_history_id.
+    Returns:
+        A list of mailbox changes that occured after the start_history_id.
+    """
+    try:
+        history = service.users().history().list(userId=user_id, 
+                                startHistoryId=start_history_id
+                                ).execute()
+        changes = history['history'] if 'history' in history else []
+        while 'nextPageToken' in history:
+            page_token = history['nextPageToken']
+            history = service.users().history().list(userId=user_id,
+                            startHistoryId=start_history_id, 
+                            pageToken=page_token).execute()
+            changes.extend(history['history'])
+        return changes
+    except errors.HttpError, error:
+        print 'An error occurred: %s' % error
+
+
+
 def ListUnreadMessages(service):
     """ Lists all unread messages.
     Args:
         service: Authorized Gmail API service instance.
     """
     return ListMessagesWithLabels(service, 'UNREAD')
+
 
 def ListUnreadThreads(service):
     """ Lists all unread threads.
@@ -284,14 +332,49 @@ def ListUnreadThreads(service):
     """
     return ListThreadsWithLabels(service, 'UNREAD')
 
-# ListMessagesMatchingQuery(service, user_id='me', query=''):
-# ListMessagesWithLabels(service, user_id='me', label_ids=[]):
-# getMessage(service, user_id='me', msg_id):
-# getThread(service, user_id='me', thread_id):
-# getMimeMessage(service, user_id='me', msg_id):
-# ListThreadsMatchingQuery(service, user_id='me', query=''):
-# ListThreadsWithLabels(service, user_id='me', label_ids=[]):
-# GetAttachments(service, user_id='me', msg_id, store_dir)
+
+def MakeLabel(label_name, mlv='show', llv='labelShow'):
+    """Create Label object.
+    Args:
+        label_name: The name of the Label.
+        mlv: Message list visibility, show/hide.
+        llv: Label list visibility, labelShow/labelHide.
+    Returns:
+        Created Label.
+    """
+    label = {'messageListVisibility': mlv,
+             'name': label_name,
+             'labelListVisibility': llv}
+    return label
+
+
+def ModifyThread(service, thread_id, msg_labels, user_id='me'):
+    """ Add labels to a Thread.
+    Args:
+        service: Authorized Gmail API service instance.
+        user_id: User's email adress or 'me'.
+        thread_id: The id of the thread to be modified.
+        msg_labels: The change in labels.
+    Returns:
+        Thread with modified Labels.
+    """
+    try:
+        thread = service.users().threads().modify(userId=user_id, id=thread_id,
+                                                  body=msg_labels).execute()
+        thread_id = thread['id']
+        label_ids = thread['messages'][0]['labelIds']
+        print 'Thread ID: %s - With Label IDs %s' % (thread_id, label_ids)
+        return thread
+    except errors.HttpError, error:
+        print 'An error occurred: %s' % error
+
+
+def CreateMsgLabels():
+    """ Create object to update labels.
+    Returns:
+        A label update object.
+    """
+    return { 'removeLabelIds':[], 'addLabelIds':['UNREAD', 'Label_2']}
 
 
 credentials = getCredentials()
