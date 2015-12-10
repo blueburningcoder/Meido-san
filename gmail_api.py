@@ -58,12 +58,29 @@ def ListMessagesMatchingQuery(service, user_id='me', query=''):
         print 'An error occurred: %s' % error
 
 
-def ListMessagesWithLabels(service, user_id='me', label_ids=[]):
+def listLabels(service, user_id='me'):
+    """ Get a list of all Labels in the user's mailbox.
+    Args:
+        service: Authorized Gmail API service instance.
+        user_id: User's email address or "me".
+    Returns:
+        A list with all labels in the user's mailbox.
+    """
+    try:
+        response = service.users().labels().list(userId=user_id).execute()
+        labels = response['labels']
+        for label in labels:
+            print 'Label id: %s - Label name: %s' % (label['id'], label['name'])
+        return labels
+    except errors.HttpError, error:
+        print 'An error occured: %s' % error
+
+
+def ListMessagesWithLabels(service, label_ids=[], user_id='me'):
     """List all Messages of the user's mailbox with label_ids applied.
     Args:
         service: Authorized Gmail API service instance.
-        user_id: User's email address. The special value "me"
-        can be used to indicate the authenticated user.
+        user_id: User's email address or "me".
         label_ids: Only return Messages with these labelIds applied.
     Returns:
         List of Messages that have all required Labels applied. Note that the
@@ -106,7 +123,7 @@ def getCredentials():
     return credentials
 
 
-def getMessage(service, user_id='me', msg_id):
+def getMessage(service, msg_id, user_id='me'):
     """ Get a Message with the given ID
     Args:
         service: Authorized Gmail API service instance
@@ -124,7 +141,7 @@ def getMessage(service, user_id='me', msg_id):
         print 'An error ocurred: %s' % error
 
 
-def getMimeMessage(service, user_id='me', msg_id):
+def getMimeMessage(service, msg_id, user_id='me'):
     """ Get a Message and use it to create a MIME Message
     Args:
         service: Authorized Gmail API service instance.
@@ -145,10 +162,10 @@ def getMimeMessage(service, user_id='me', msg_id):
         print 'An error ocurred: %s' % error
 
 
-def getThread(service, user_id='me', thread_id):
+def getThread(service, thread_id, user_id='me'):
     """ Get a Thread.
     Args:
-        service: Authorized Gmaiil API service instance.
+        service: Authorized Gmail API service instance.
         user_id: User's email address.
         thread_id: The ID of the Thread required.
     Returns:
@@ -195,7 +212,7 @@ def ListThreadsMatchingQuery(service, user_id='me', query=''):
         print 'An error occured: %s' % error
 
 
-def ListThreadsWithLabels(service, user_id='me', label_ids=[]):
+def ListThreadsWithLabels(service, label_ids=[], user_id='me'):
     """List all Threads of the user's mailbox with label_ids applied.
     Args:
         service: Authorized Gmail API service instance.
@@ -225,8 +242,60 @@ def ListThreadsWithLabels(service, user_id='me', label_ids=[]):
         print 'An error occurred: %s' % error
 
 
+def GetAttachments(service, msg_id, user_id='me', store_dir='/home/bez/Downloads/'):
+    """Get and store attachment from Message with given id.
+    Args:
+        service: Authorized Gmail API service instance.
+        user_id: User's email address. The special value "me"
+        can be used to indicate the authenticated user.
+        msg_id: ID of Message containing attachment.
+        store_dir: The directory used to store attachments.
+    """
+
+    try:
+        message = service.users().messages().get(userId=user_id, id=msg_id).execute()
+        for part in message['payload']['parts']:
+            if part['filename']:
+                print part
+                file_data = base64.urlsafe_b64decode(part['body']['data']).encode('UTF-8')
+#               file_data = base64.urlsafe_b64decode(part['body']['attachmentId'].encode('UTF-8') + '=')
+                path = ''.join([store_dir, part['filename']])
+                f = open(path, 'w')
+                f.write(file_data)
+                f.close()
+                print 'Saved attachement %s to %s' % (part['filename'], store_dir)
+            else:
+                print 'Not an attachement'
+    except errors.HttpError, error:
+        print 'An error occurred: %s' % error
+
+
+def ListUnreadMessages(service):
+    """ Lists all unread messages.
+    Args:
+        service: Authorized Gmail API service instance.
+    """
+    return ListMessagesWithLabels(service, 'UNREAD')
+
+def ListUnreadThreads(service):
+    """ Lists all unread threads.
+    Args:
+        service: Authorized Gmail API service instance.
+    """
+    return ListThreadsWithLabels(service, 'UNREAD')
+
+# ListMessagesMatchingQuery(service, user_id='me', query=''):
+# ListMessagesWithLabels(service, user_id='me', label_ids=[]):
+# getMessage(service, user_id='me', msg_id):
+# getThread(service, user_id='me', thread_id):
+# getMimeMessage(service, user_id='me', msg_id):
+# ListThreadsMatchingQuery(service, user_id='me', query=''):
+# ListThreadsWithLabels(service, user_id='me', label_ids=[]):
+# GetAttachments(service, user_id='me', msg_id, store_dir)
+
+
 credentials = getCredentials()
 http = credentials.authorize(httplib2.Http())
 service = build('gmail', 'v1', http=http, credentials=credentials)
 userId = 'meido.info@gmail.com'
-# mes = ListMessagesMatchingQuery(service, 'me')
+mes = ListMessagesMatchingQuery(service)
