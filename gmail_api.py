@@ -4,6 +4,7 @@ or the like in python
 basically everything needed to access one's E-mail.
 (gotta find a way for getting the secret too ...)
 """
+
 from apiclient import errors
 from apiclient.discovery import build
 from oauth2client import tools
@@ -28,7 +29,7 @@ CLIENT_SECRET_FILE = '../../Downloads/client_secret.json'
 APPLICATION_NAME = 'Meido-san'
 
 
-def ListMessagesMatchingQuery(service, user_id='me', query=''):
+def ListMessagesMatchingQuery(service, query='', user_id='me'):
     """List all Messages of the user's mailbox matching the query.
     Args:
         service: Authorized Gmail API service instance.
@@ -224,6 +225,47 @@ def ListThreadsWithLabels(service, user_id='me', label_ids=[]):
     except errors.HttpError, error:
         print 'An error occurred: %s' % error
 
+
+def GetAttachments(service, msg_id, store_dir='/home/bez/Downloads/', user_id='me'):
+    """Get and store attachment from Message with given id.
+    Args:
+        service: Authorized Gmail API service instance.
+        user_id: User's email address. The special value "me"
+        can be used to indicate the authenticated user.
+        msg_id: ID of Message containing attachment.
+        store_dir: The directory used to store attachments.
+    """
+    try:
+        message = service.users().messages().get(userId=user_id, id=msg_id).execute()
+        for part in message['payload']['parts']:
+            if part['filename']:
+                print part
+                file_data = base64.urlsafe_b64decode(part['body']['data']).encode('UTF-8')
+#               file_data = base64.urlsafe_b64decode(part['body']['attachmentId'].encode('UTF-8') + '=')
+                path = ''.join([store_dir, part['filename']])
+                f = open(path, 'w')
+                f.write(file_data)
+                f.close()
+                print 'Saved attachement %s to %s' % (part['filename'], store_dir)
+            else:
+                print 'Not an attachement'
+    except errors.HttpError, error:
+        print 'An error occurred: %s' % error
+
+
+def ListUnreadMessages(service):
+    """ Lists all unread messages.
+    Args:
+        service: Authorized Gmail API service instance.
+    """
+    return ListMessagesWithLabels(service, 'UNREAD')
+
+def ListUnreadThreads(service):
+    """ Lists all unread threads.
+    Args:
+        service: Authorized Gmail API service instance.
+    """
+    return ListThreadsWithLabels(service, 'UNREAD')
 
 credentials = getCredentials()
 http = credentials.authorize(httplib2.Http())
