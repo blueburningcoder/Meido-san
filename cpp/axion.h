@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <ctime>
 
 #include "stack.h"
 
@@ -14,14 +15,13 @@ class Axion : public Actable {
 protected:
     std::vector<Neuron*> connected_to;
     std::vector<double> weight;
-    double action = 0;
-    Neuron* connection_from;
+    double input = 0;
 public:
-    Axion(Neuron* start);
+    Axion();
     void ConnectTo(Neuron* neuron);
     void unConnectFrom(Neuron* neuron);
-    void Input(double spike);
-    virtual void getActive();
+    void Input(double inp);
+    double getActive();
 };
 
 

@@ -16,10 +16,19 @@ protected:
     std::vector<double> inputStack;
     double bias = 0;
 public:
-    Neuron();
-    virtual void getActive();
-    void addToInput(double value);
+    Neuron(Axion* connection);
     double function(double x);
+    void Input(double);
+    double getActive();
+};
+
+
+
+class OutputNeuron : public Neuron {
+public:
+    OutputNeuron(Axion* connection);
+    double getActive();
+    void Input(double d) { Neuron::Input(d); }
 };
 
 

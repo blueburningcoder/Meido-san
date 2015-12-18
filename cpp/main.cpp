@@ -1,16 +1,28 @@
 #include <iostream>
 
 
-#include "combined.cpp"
+#include "import_all.h"
 
-// Main function ... not doing anything yet
+// Main function ... not doing anything real just yet
 int main() {
-    Neuron neuron;
-    Axion axion(&neuron);
+    Axion axion, axion1;
+    OutputNeuron out(&axion1);
+    Neuron neuron(&axion);
+
+    axion.ConnectTo(&out);
 
     Stack stack;
-    stack.addToStack(&neuron);
-    stack.addToStack(&axion);
+
+    neuron.setStack(&stack);
+    axion.setStack(&stack);
+    out.setStack(&stack);
+    axion1.setStack(&stack);
+
+    neuron.Input(3);
 
     stack.finishStack();
+
+    return 0;
 }
+
+

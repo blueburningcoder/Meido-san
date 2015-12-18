@@ -9,22 +9,26 @@ class Stack;
 
 class Actable {
 public:
-    virtual void getActive()=0;
-    static Stack* ownStack;
+    virtual double getActive() = 0;
+    virtual void Input(double) = 0;
+    void setStack(Stack* own) { ownStack = own; }
+    bool in_queue = false;
+    Stack* ownStack = NULL;
 };
 
 
 
-class Stack : public Actable {
+class Stack : protected Actable {
 protected:
     std::vector<Actable*> stack;
     int current = 0;
 public:
-    Stack() { ownStack = this; }
+    Stack();
     void addToStack(Actable* next);
     void workStack();
     void finishStack();
-    virtual void getActive() { finishStack(); }
+    void Input(double i) { }
+    double getActive() { finishStack(); return 0; }
 };
 
 
