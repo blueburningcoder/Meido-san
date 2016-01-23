@@ -1,5 +1,7 @@
 #include <iostream>
 
+#define DEBUG false
+
 #include "combined.cpp"
 
 
@@ -19,8 +21,8 @@ void Stack::addToStack(Actable* next) {
 
 void Stack::workStack() {
     if (current >= 1 && stack.size() >= 1) {
-        std::cout << "trying to do sth ... " << stack[0] << std::endl;
-        std::cout << stack[0]->in_queue << std::endl;
+        out("trying to do sth ... " + std::string.to_string(stack[0] ) );
+        out(stack[0]->in_queue);
 
         stack[0]->getActive();
         stack.erase(stack.begin());
@@ -35,6 +37,12 @@ void Stack::workStack() {
 void Stack::finishStack() {
     while (current >= 1)
         workStack();
+}
+
+
+void out(std::string output) {
+    if (DEBUG)
+        std::cout << output << std::endl;
 }
 
 

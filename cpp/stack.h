@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <string>
 
 
 class Stack;
@@ -31,5 +32,7 @@ public:
     double getActive() { finishStack(); return 0; }
 };
 
+
+void out(std::string output);
 
 #endif
